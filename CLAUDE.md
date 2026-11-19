@@ -14,6 +14,7 @@
 bb device   # jar を作る (Java のソースを変えたら必ず)
 bb test     # clojure.test (device のタスクを先に実行する)。失敗があれば終了コード 1
 bb start    # 起動
+clojure -T:build uber   # 配布用の jar (target/vmidikey-<版>.jar、機器も同梱)。版の番号は build.clj の version
 clojure -Sdeps '{:deps {clj-kondo/clj-kondo {:mvn/version "2024.08.01"}}}' -M -m clj-kondo.main --lint src test   # 警告 0 を保つ
 ```
 - ChromeOS の Linux は DISPLAY=wayland-0 (sommelier が設定) で Java が X11 につなげない。bb のタスクは自動で DISPLAY=:0 にする。clojure を直接使うときは `DISPLAY=:0` を付ける。
@@ -25,3 +26,4 @@ clojure -Sdeps '{:deps {clj-kondo/clj-kondo {:mvn/version "2024.08.01"}}}' -M -m
 - 返答は日本語で、結論から簡潔に。
 - 計算 (キーの割り当て、鍵盤の配置、イベントの処理) は純粋関数にして clojure.test でテストする。副作用は out.clj と gui.clj の run! に集める。
 - 機能を変えたら README の該当の節と「確認したこと」を更新する。
+- リリースはタグ `v<版>` を push すると `.github/workflows/release.yml` が jar を Releases に置く (タグを打つ前にユーザーに確認する)。

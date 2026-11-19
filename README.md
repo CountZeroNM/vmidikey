@@ -12,7 +12,17 @@ ChromeOS の Linux（Crostini）のように、ALSA の仮想 MIDI 機器（snd-
  └──────────────────────────────────────────────┘        └──────────────────────────────────────────┘
 ```
 
-## 必要なもの
+## ダウンロードして試す（Clojure の開発環境は不要）
+
+[Releases](https://github.com/CountZeroNM/vmidikey/releases) から `vmidikey-0.1.0.jar`（約 5MB）をダウンロードして、`java -jar vmidikey-0.1.0.jar` かダブルクリックで開きます。必要なのは **Java 17 以上**だけです（Java 21 で確認しています。[Adoptium（Temurin）](https://adoptium.net/ja/) など）。
+
+- [polysted](https://github.com/CountZeroNM/polysted/releases) の jar には、受け口（仮想 MIDI 入力の機器「VMidiKey」）が入っています。2 つの jar を起動するだけで、polysted の録音を VMidiKey で試せます。
+- ほかの Java のアプリで受けるときは、この jar を受け側の classpath に足すと、機器「VMidiKey」が見えます（jar に機器も入っています）。
+- macOS で「開発元を確認できない」と止められたら、Control キーを押しながらクリックして「開く」。ChromeOS の Linux でウィンドウが開かないときは `DISPLAY=:0 java -jar vmidikey-0.1.0.jar`。
+
+自分で jar を作るときは `clojure -T:build uber`（`target/vmidikey-<版>.jar`）。タグ `v*` を push すると、GitHub Actions が jar を作って Releases に置きます。
+
+## 必要なもの（ソースから使う場合）
 
 - JDK 11 以上（`javac` と `jar`。仮想 MIDI 機器を作るとき）
 - Clojure CLI
@@ -60,6 +70,8 @@ deps.edn の場合:
 
 ### polysted で録音する
 
+配布用の jar どうしなら、上の「ダウンロードして試す」のとおり 2 つを起動するだけです。ソースから使うときは、次のようにします。
+
 [polysted](https://github.com/CountZeroNM/polysted)（STED2 に強い影響を受けた MIDI ステップエディタ／シーケンサ、Clojure）の `deps.edn` には、このエイリアス `:vmidikey` があります。vmidikey と polysted を **同じ階層** に clone して使います。
 
 ```
@@ -91,7 +103,8 @@ clojure -M:vmidikey:tui my_song.edn      # GUI なら -M:vmidikey:gui、REPL な
 | `src/vmidikey/piano.clj` | 画面の鍵盤の配置と当たり判定（純粋関数） |
 | `src/vmidikey/out.clj` | 送り先（UDP・内蔵音源） |
 | `src/vmidikey/gui.clj` | ウィンドウ（イベントの処理 `handle` は純粋関数） |
-| `src/vmidikey/main.clj` | 起動 |
+| `src/vmidikey/main.clj` | 起動（配布用の jar の入口。`--version` `--help`） |
+| `build.clj` / `.github/workflows/release.yml` | 配布用の jar を作る（`clojure -T:build uber`）/ タグ `v*` で Releases に置く |
 | `test/vmidikey/*_test.clj` | テスト（clojure.test。仮想 MIDI 機器の結合テストを含む） |
 | `bb.edn` / `deps.edn` | タスクとエイリアス |
 

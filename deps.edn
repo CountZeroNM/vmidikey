@@ -8,5 +8,8 @@
  :deps {org.clojure/clojure {:mvn/version "1.12.0"}}
  :aliases
  {:run  {:main-opts ["-m" "vmidikey.main"]}
+  ;; 配布用の jar を作る (build.clj): clojure -T:build uber
+  :build {:deps {io.github.clojure/tools.build {:mvn/version "0.10.5"}}
+          :ns-default build}
   :test {:extra-paths ["test" "target/vmidikey-device.jar"]
          :main-opts ["-m" "vmidikey.test-runner"]}}}
