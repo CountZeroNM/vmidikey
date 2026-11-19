@@ -9,7 +9,7 @@
   (System/setProperty "vmidikey.port" "47199")               ; ほかで動いているキーボードとぶつからないように
   (let [info (first (filter #(= "VMidiKey" (.getName %)) (MidiSystem/getMidiDeviceInfo)))
         ^MidiDevice dev (some-> info MidiSystem/getMidiDevice)]
-    (testing "機器の一覧に出る (STED の midi-inputs と同じ条件: 送信口があり、シーケンサ・音源でない)"
+    (testing "機器の一覧に出る (polysted の midi-inputs と同じ条件: 送信口があり、シーケンサ・音源でない)"
       (is (some? dev))
       (is (and (not= 0 (.getMaxTransmitters dev)) (not (instance? Sequencer dev)) (not (instance? Synthesizer dev)))))
     (when dev

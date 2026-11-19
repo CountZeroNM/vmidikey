@@ -1,11 +1,11 @@
 # VMidiKey — 仮想 MIDI キーボード
 
-文字キーと画面の鍵盤で弾ける、仮想 MIDI キーボードです（Clojure + Swing）。押した音は、同じパソコンの中の UDP で **Java の仮想 MIDI 入力の機器「VMidiKey」** に届きます。この機器の jar を classpath に足した Java のアプリ（[STED](../sted) など）からは、普通の **MIDI 入力の機器** として見えます。
+文字キーと画面の鍵盤で弾ける、仮想 MIDI キーボードです（Clojure + Swing）。押した音は、同じパソコンの中の UDP で **Java の仮想 MIDI 入力の機器「VMidiKey」** に届きます。この機器の jar を classpath に足した Java のアプリ（[polysted](https://github.com/CountZeroNM/polysted) など）からは、普通の **MIDI 入力の機器** として見えます。
 
 ChromeOS の Linux（Crostini）のように、ALSA の仮想 MIDI 機器（snd-virmidi）が使えず、Java の MIDI 機器の一覧に内蔵の音源しか出ない環境でも、MIDI 入力を使うアプリを試せるようにするためのものです。
 
 ```
- ┌──────────── vmidikey (このアプリ) ───────────┐        ┌──────── 受け側の JVM (STED など) ────────┐
+ ┌──────────── vmidikey (このアプリ) ───────────┐        ┌────── 受け側の JVM (polysted など) ──────┐
  │ 文字キー / 画面の鍵盤 → MIDI メッセージ           │  UDP   │ VMidiKey 機器 (target/vmidikey-device.jar) │
  │   → UDP 127.0.0.1:47100 へ 1 メッセージずつ  ─────┼──────→ │   → 送信口 (Transmitter) → アプリの受け手  │
  │   → 内蔵音源で鳴らす (モニター)                  │        │ MidiSystem の機器の一覧に "VMidiKey"       │
@@ -21,7 +21,8 @@ ChromeOS の Linux（Crostini）のように、ALSA の仮想 MIDI 機器（snd-
 ## 使い方
 
 ```bash
-cd ~/code/vmidikey
+git clone https://github.com/CountZeroNM/vmidikey.git
+cd vmidikey
 bb device      # 仮想 MIDI 機器の jar を作る (target/vmidikey-device.jar)
 bb start       # キーボードを起動 (clojure -M:run)
 bb test        # テスト
@@ -43,7 +44,7 @@ bb test        # テスト
 | `Esc` | すべての音を止める |
 | 上の欄 | 送り先（VMidiKey へ送る・内蔵音源で鳴らす）、MIDI チャンネル |
 
-- 鍵盤には、届く範囲の文字キーと C の音名を書いています。音名は STED と同じく C4 = 60 です。
+- 鍵盤には、届く範囲の文字キーと C の音名を書いています。音名は STED2・polysted と同じく C4 = 60 です。
 - キーは文字ではなくキーの位置（キーコード）で決めるので、JIS 配列でも同じ位置で弾けます。
 - Linux のオートリピート（押したままにすると「離した → 押した」が続けて届く）は無視します。
 
@@ -57,13 +58,25 @@ deps.edn の場合:
 {:aliases {:vmidikey {:extra-deps {vmidikey/device {:local/root "../vmidikey/target/vmidikey-device.jar"}}}}}
 ```
 
-**STED で録音する例**（STED の deps.edn にはこのエイリアスがあります）:
+### polysted で録音する
+
+[polysted](https://github.com/CountZeroNM/polysted)（STED2 に強い影響を受けた MIDI ステップエディタ／シーケンサ、Clojure）の `deps.edn` には、このエイリアス `:vmidikey` があります。vmidikey と polysted を **同じ階層** に clone して使います。
+
+```
+(作業用のフォルダ)/
+├── polysted/   (deps.edn の :vmidikey が ../vmidikey/target/vmidikey-device.jar を指す)
+└── vmidikey/
+```
 
 ```bash
-cd ~/code/sted
-clojure -M:vmidikey:sted          # REPL。TUI なら clojure -M:vmidikey tui.clj
-# トラック設定 (Tab) で MODE を Rec に → Ctrl-X rec → Enter で録音開始 → vmidikey で弾く → Esc
+cd vmidikey && bb device && bb start     # jar を作って、キーボードを開く
+# 別の端末で
+cd polysted
+clojure -M:vmidikey:tui my_song.edn      # GUI なら -M:vmidikey:gui、REPL なら -M:vmidikey:repl
+# トラック設定 (Tab) で MODE を Rec か Mix に → Ctrl-X rec → Enter で録音開始 → vmidikey で弾く → Esc で取り込む
 ```
+
+録音したトラックを聴くときは、MODE を Play か Mix に戻します（Rec のトラックは再生で鳴りません）。詳しくは polysted の README の「レコーディング」を見てください。
 
 ポートは、両方の JVM でシステムプロパティ `vmidikey.port` か環境変数 `VMIDIKEY_PORT` で変えられます（同じ値にする）。
 
@@ -86,5 +99,9 @@ clojure -M:vmidikey:sted          # REPL。TUI なら clojure -M:vmidikey tui.cl
 
 - テスト 8 件（43 の確認）: キーの割り当て・オクターブ・ベロシティ・ホールド・すべて止める、鍵盤の配置と当たり判定、イベントの処理と描画、仮想 MIDI 機器（一覧に出る・開く・UDP のノートとエクスクルーシブが届く・閉じる）。
 - ウィンドウで、文字キーの和音・オートリピートの無視・鍵盤のクリック。
-- STED（`clojure -M:vmidikey`）の機器の一覧に `VMidiKey` が出て、STED の録音で C4・E4・G4 とボリュームの変更が取り込まれた。
+- polysted（`clojure -M:vmidikey`）の機器の一覧に `VMidiKey` が出て、録音で C4・E4・G4 とボリュームの変更が取り込まれた（polysted の開発版で確認。公開版でも UDP で送ったノートが届くことを確認）。
 - clj-kondo の警告 0。
+
+## ライセンス
+
+[MIT License](LICENSE)

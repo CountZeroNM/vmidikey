@@ -4,8 +4,10 @@
 - 文字キーと画面の鍵盤で弾く仮想 MIDI キーボード (Clojure + Swing)。押した音は UDP 127.0.0.1:47100 へ送る。
 - 受け側は Java の仮想 MIDI 入力の機器 "VMidiKey" (`java/src/vmidikey/spi`、`bb device` で `target/vmidikey-device.jar`)。
   受け側の JVM の classpath に jar を足すと MidiSystem の機器の一覧に出る。
-- 目的: ChromeOS の Linux では ALSA の仮想 MIDI 機器が使えず Java から見えないので、STED (`~/code/sted`) の
-  MIDI 入力 (録音) を試すために作った。STED の deps.edn のエイリアス `:vmidikey` で使う。
+- 目的: ChromeOS の Linux では ALSA の仮想 MIDI 機器が使えず Java から見えないので、polysted
+  (https://github.com/CountZeroNM/polysted、開発版は `~/code/sted`) の MIDI 入力 (録音) を試すために作った。
+  polysted の deps.edn のエイリアス `:vmidikey` で使う (`../vmidikey/target/vmidikey-device.jar`)。
+- 公開リポジトリ: https://github.com/CountZeroNM/vmidikey (MIT)。個人のパスやメモをコミットしない。
 
 ## 動作確認
 ```bash

@@ -5,7 +5,7 @@
      下の段  Z S X D C V G B H N J M  , L . ; /   → base から (白鍵 = 下の列、黒鍵 = その上の列)
      上の段  Q 2 W 3 E R 5 T 6 Y 7 U  I 9 O 0 P   → base + 12 から
    キーは java.awt.event.KeyEvent のキーコード (VK_*) の数値で持つ (配列の違う JIS キーボードでも同じ位置)。
-   音名は STED と同じく C4 = 60。")
+   音名は STED2・polysted と同じく C4 = 60。")
 
 ;; KeyEvent の VK_ の値 (java.awt に頼らずテストできるよう数値で持つ)
 (def ^:private vk
