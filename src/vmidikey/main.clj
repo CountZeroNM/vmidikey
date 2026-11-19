@@ -23,4 +23,8 @@
     (do (println "画面 (ウィンドウ) が使えない環境です。") (System/exit 1))
     :else
     (do (println (str "VMidiKey " (version) ": UDP 127.0.0.1:" (out/port) " へ送ります (受け側は VMidiKey の機器)"))
+        (let [{:keys [latency-ms tuned?]} (try (out/warm-up!) (catch Throwable _ nil))]
+          (when latency-ms
+            (println (str "内蔵音源の遅れ: " latency-ms "ms"
+                          (when-not tuned? " (指定できない起動のしかたなので既定のまま。java -jar か clojure -M:run で起動してください)")))))
         (gui/run! {:exit-on-close? true}))))

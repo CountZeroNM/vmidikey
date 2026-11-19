@@ -7,9 +7,11 @@
 {:paths ["src"]
  :deps {org.clojure/clojure {:mvn/version "1.12.0"}}
  :aliases
- {:run  {:main-opts ["-m" "vmidikey.main"]}
+ {:run  {:jvm-opts ["--add-exports=java.desktop/com.sun.media.sound=ALL-UNNAMED"]   ; 内蔵音源の遅れを指定するため (out.clj)
+         :main-opts ["-m" "vmidikey.main"]}
   ;; 配布用の jar を作る (build.clj): clojure -T:build uber
   :build {:deps {io.github.clojure/tools.build {:mvn/version "0.10.5"}}
           :ns-default build}
   :test {:extra-paths ["test" "target/vmidikey-device.jar"]
+         :jvm-opts ["--add-exports=java.desktop/com.sun.media.sound=ALL-UNNAMED"]
          :main-opts ["-m" "vmidikey.test-runner"]}}}

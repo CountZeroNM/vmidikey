@@ -27,3 +27,4 @@ clojure -Sdeps '{:deps {clj-kondo/clj-kondo {:mvn/version "2024.08.01"}}}' -M -m
 - 計算 (キーの割り当て、鍵盤の配置、イベントの処理) は純粋関数にして clojure.test でテストする。副作用は out.clj と gui.clj の run! に集める。
 - 機能を変えたら README の該当の節と「確認したこと」を更新する。
 - リリースはタグ `v<版>` を push すると `.github/workflows/release.yml` が jar を Releases に置く (タグを打つ前にユーザーに確認する)。
+- 内蔵音源 (モニター) は遅れ 40ms で開く (`out/open-synth!`。Java の内部の API を使うので、`:run` `:test` の jvm-opts と jar の manifest に `--add-exports java.desktop/com.sun.media.sound`)。

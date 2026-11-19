@@ -14,11 +14,11 @@ ChromeOS の Linux（Crostini）のように、ALSA の仮想 MIDI 機器（snd-
 
 ## ダウンロードして試す（Clojure の開発環境は不要）
 
-[Releases](https://github.com/CountZeroNM/vmidikey/releases) から `vmidikey-0.1.0.jar`（約 5MB）をダウンロードして、`java -jar vmidikey-0.1.0.jar` かダブルクリックで開きます。必要なのは **Java 17 以上**だけです（Java 21 で確認しています。[Adoptium（Temurin）](https://adoptium.net/ja/) など）。
+[Releases](https://github.com/CountZeroNM/vmidikey/releases) から `vmidikey-0.1.1.jar`（約 5MB）をダウンロードして、`java -jar vmidikey-0.1.1.jar` かダブルクリックで開きます。必要なのは **Java 17 以上**だけです（Java 21 で確認しています。[Adoptium（Temurin）](https://adoptium.net/ja/) など）。
 
 - [polysted](https://github.com/CountZeroNM/polysted/releases) の jar には、受け口（仮想 MIDI 入力の機器「VMidiKey」）が入っています。2 つの jar を起動するだけで、polysted の録音を VMidiKey で試せます。
 - ほかの Java のアプリで受けるときは、受け口だけの `vmidikey-device.jar`（約 6KB、同じ Releases にあります）か、この jar を受け側の classpath に足すと、機器「VMidiKey」が見えます。
-- macOS で「開発元を確認できない」と止められたら、Control キーを押しながらクリックして「開く」。ChromeOS の Linux でウィンドウが開かないときは `DISPLAY=:0 java -jar vmidikey-0.1.0.jar`。
+- macOS で「開発元を確認できない」と止められたら、Control キーを押しながらクリックして「開く」。ChromeOS の Linux でウィンドウが開かないときは `DISPLAY=:0 java -jar vmidikey-0.1.1.jar`。
 
 自分で jar を作るときは `clojure -T:build uber`（`target/vmidikey-<版>.jar`）。タグ `v*` を push すると、GitHub Actions が jar を作って Releases に置きます。
 
@@ -68,6 +68,15 @@ deps.edn の場合:
 {:aliases {:vmidikey {:extra-deps {vmidikey/device {:local/root "../vmidikey/target/vmidikey-device.jar"}}}}}
 ```
 
+### 音の遅れ（モニターの内蔵音源）
+
+画面の「内蔵音源で鳴らす」は、Java の内蔵音源（Gervill）で鳴らします。内蔵音源は既定で 120ms の遅れ（音のバッファ）を持って開かれ、弾いてから鳴るまでがはっきり遅れて聞こえるので、VMidiKey は **40ms** で開きます（0.1.1 から）。起動したときに「内蔵音源の遅れ: 40ms」と表示されます。
+
+- 変えるときは、システムプロパティ `vmidikey.latency` か環境変数 `VMIDIKEY_LATENCY`（ミリ秒）で指定します。例: `java -Dvmidikey.latency=30 -jar vmidikey-0.1.1.jar`
+- 小さくしすぎると、音がとぎれたり、プツプツ鳴ったりします。そのときは 60〜80 に上げてください。内蔵音源のしくみの都合で、実際の下限は約 35ms です。
+- 遅れの指定には Java の内部の機能を使うので、jar は manifest の `Add-Exports`、ソースからは `clojure -M:run`（`bb start`）が、その許可を付けて起動します。ほかの起動のしかたでは既定の 120ms のままになり、起動時の表示でわかります。
+- OS の音声の出口（ChromeOS の Linux など）にも遅れがあるので、全体の遅れはこれより大きくなります。UDP で polysted に送る部分の遅れは、ほとんどありません。
+
 ### polysted で録音する
 
 配布用の jar どうしなら、上の「ダウンロードして試す」のとおり 2 つを起動するだけです。ソースから使うときは、次のようにします。
@@ -110,7 +119,7 @@ clojure -M:vmidikey:tui my_song.edn      # GUI なら -M:vmidikey:gui、REPL な
 
 ## 確認したこと（2026-11-19）
 
-- テスト 8 件（43 の確認）: キーの割り当て・オクターブ・ベロシティ・ホールド・すべて止める、鍵盤の配置と当たり判定、イベントの処理と描画、仮想 MIDI 機器（一覧に出る・開く・UDP のノートとエクスクルーシブが届く・閉じる）。
+- テスト 9 件（45 の確認）: キーの割り当て・オクターブ・ベロシティ・ホールド・すべて止める、鍵盤の配置と当たり判定、イベントの処理と描画、仮想 MIDI 機器（一覧に出る・開く・UDP のノートとエクスクルーシブが届く・閉じる）。
 - ウィンドウで、文字キーの和音・オートリピートの無視・鍵盤のクリック。
 - polysted（`clojure -M:vmidikey`）の機器の一覧に `VMidiKey` が出て、録音で C4・E4・G4 とボリュームの変更が取り込まれた（polysted の開発版で確認。公開版でも UDP で送ったノートが届くことを確認）。
 - clj-kondo の警告 0。

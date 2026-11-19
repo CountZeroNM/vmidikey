@@ -5,7 +5,7 @@
 (ns build
   (:require [clojure.tools.build.api :as b]))
 
-(def version "0.1.0")
+(def version "0.1.1")
 (def class-dir "target/uber-classes")
 (def uber-file (format "target/vmidikey-%s.jar" version))
 
@@ -23,5 +23,7 @@
     (b/write-file {:path (str class-dir "/vmidikey/version.txt") :string version})
     (b/compile-clj {:basis basis :class-dir class-dir :ns-compile '[vmidikey.main]
                     :java-opts ["-Djava.awt.headless=true"]})
-    (b/uber {:class-dir class-dir :uber-file uber-file :basis basis :main 'vmidikey.main})
+    ;; 内蔵音源の遅れを指定するため、内部の API を使えるようにする (java -jar のとき manifest で効く)
+    (b/uber {:class-dir class-dir :uber-file uber-file :basis basis :main 'vmidikey.main
+             :manifest {"Add-Exports" "java.desktop/com.sun.media.sound"}})
     (println "作成:" uber-file)))
