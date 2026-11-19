@@ -17,7 +17,7 @@ ChromeOS の Linux（Crostini）のように、ALSA の仮想 MIDI 機器（snd-
 [Releases](https://github.com/CountZeroNM/vmidikey/releases) から `vmidikey-0.1.0.jar`（約 5MB）をダウンロードして、`java -jar vmidikey-0.1.0.jar` かダブルクリックで開きます。必要なのは **Java 17 以上**だけです（Java 21 で確認しています。[Adoptium（Temurin）](https://adoptium.net/ja/) など）。
 
 - [polysted](https://github.com/CountZeroNM/polysted/releases) の jar には、受け口（仮想 MIDI 入力の機器「VMidiKey」）が入っています。2 つの jar を起動するだけで、polysted の録音を VMidiKey で試せます。
-- ほかの Java のアプリで受けるときは、この jar を受け側の classpath に足すと、機器「VMidiKey」が見えます（jar に機器も入っています）。
+- ほかの Java のアプリで受けるときは、受け口だけの `vmidikey-device.jar`（約 6KB、同じ Releases にあります）か、この jar を受け側の classpath に足すと、機器「VMidiKey」が見えます。
 - macOS で「開発元を確認できない」と止められたら、Control キーを押しながらクリックして「開く」。ChromeOS の Linux でウィンドウが開かないときは `DISPLAY=:0 java -jar vmidikey-0.1.0.jar`。
 
 自分で jar を作るときは `clojure -T:build uber`（`target/vmidikey-<版>.jar`）。タグ `v*` を push すると、GitHub Actions が jar を作って Releases に置きます。
