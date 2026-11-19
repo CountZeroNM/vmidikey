@@ -1,0 +1,15 @@
+;; vmidikey のタスク (babashka):  bb tasks で一覧
+{:tasks
+ {device {:doc "Java の仮想 MIDI 機器を jar にする (target/vmidikey-device.jar)"
+          :task (do (babashka.fs/delete-tree "target/classes")
+                    (babashka.fs/create-dirs "target/classes")
+                    (shell "javac" "--release" "11" "-encoding" "UTF-8" "-d" "target/classes"
+                           "java/src/vmidikey/spi/VMidiKeyProvider.java" "java/src/vmidikey/spi/VMidiKeyDevice.java")
+                    (babashka.fs/copy-tree "java/resources" "target/classes" {:replace-existing true})
+                    (shell "jar" "cf" "target/vmidikey-device.jar" "-C" "target/classes" ".")
+                    (println "作成: target/vmidikey-device.jar"))}
+  test   {:doc "テスト (clojure.test。先に jar を作る)"
+          :depends [device]
+          :task (shell "clojure" "-M:test")}
+  start  {:doc "仮想 MIDI キーボードを起動"
+          :task (shell "clojure" "-M:run")}}}

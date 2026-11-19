@@ -1,0 +1,12 @@
+;; vmidikey — 仮想 MIDI キーボード
+;;   bb device   Java の仮想 MIDI 機器の jar を作る (target/vmidikey-device.jar)
+;;   bb start    キーボードを起動 (clojure -M:run)
+;;   bb test     テスト (clojure -M:test)
+;; 受け側のアプリ (STED など) は、target/vmidikey-device.jar を classpath に足すと "VMidiKey" という
+;; MIDI 入力の機器が見える。deps.edn なら {:extra-deps {vmidikey/device {:local/root "../vmidikey/target/vmidikey-device.jar"}}}
+{:paths ["src"]
+ :deps {org.clojure/clojure {:mvn/version "1.12.0"}}
+ :aliases
+ {:run  {:main-opts ["-m" "vmidikey.main"]}
+  :test {:extra-paths ["test" "target/vmidikey-device.jar"]
+         :main-opts ["-m" "vmidikey.test-runner"]}}}
