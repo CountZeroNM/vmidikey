@@ -14,7 +14,7 @@ bb test     # clojure.test (device のタスクを先に実行する)。失敗�
 bb start    # 起動
 clojure -Sdeps '{:deps {clj-kondo/clj-kondo {:mvn/version "2024.08.01"}}}' -M -m clj-kondo.main --lint src test   # 警告 0 を保つ
 ```
-- Claude Code の環境では画面を使うテスト・起動に `DISPLAY=:0` を付ける。
+- ChromeOS の Linux は DISPLAY=wayland-0 (sommelier が設定) で Java が X11 につなげない。bb のタスクは自動で DISPLAY=:0 にする。clojure を直接使うときは `DISPLAY=:0` を付ける。
 - ウィンドウの確認は、同じ JVM で `vmidikey.gui/run!` を `:emit` 付きで開き、合成した KeyEvent を
   `KeyboardFocusManager` 経由で送って、送られたメッセージとフレームの画像を見る。
 - 音は Claude Code からは確認できないので、ユーザーに頼む。

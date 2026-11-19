@@ -27,6 +27,8 @@ bb start       # キーボードを起動 (clojure -M:run)
 bb test        # テスト
 ```
 
+- ChromeOS の Linux では `DISPLAY` が `wayland-0` になっていて Java の画面が開けないので、`bb start` と `bb test` は、`DISPLAY` が X11 の形でなければ `DISPLAY=:0` を付けて起動します（`clojure -M:run` を直接使うときは `DISPLAY=:0 clojure -M:run`）。
+
 ### 弾き方
 
 | 操作 | 内容 |

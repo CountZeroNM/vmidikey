@@ -1,6 +1,14 @@
 ;; vmidikey のタスク (babashka):  bb tasks で一覧
 {:tasks
- {device {:doc "Java の仮想 MIDI 機器を jar にする (target/vmidikey-device.jar)"
+ {:init (do
+          ;; ChromeOS の Linux では DISPLAY が wayland-0 になっていて、Java (Swing) が X11 につなげない。
+          ;; DISPLAY が X11 の形 (:0 など) でなく、X11 のソケット /tmp/.X11-unix/X0 があるときは :0 を使う
+          (def x11-env
+            (let [d (System/getenv "DISPLAY")]
+              (if (and (not (and d (clojure.string/includes? d ":"))) (babashka.fs/exists? "/tmp/.X11-unix/X0"))
+                {"DISPLAY" ":0"}
+                {}))))
+  device {:doc "Java の仮想 MIDI 機器を jar にする (target/vmidikey-device.jar)"
           :task (do (babashka.fs/delete-tree "target/classes")
                     (babashka.fs/create-dirs "target/classes")
                     (shell "javac" "--release" "11" "-encoding" "UTF-8" "-d" "target/classes"
@@ -10,6 +18,6 @@
                     (println "作成: target/vmidikey-device.jar"))}
   test   {:doc "テスト (clojure.test。先に jar を作る)"
           :depends [device]
-          :task (shell "clojure" "-M:test")}
+          :task (shell {:extra-env x11-env} "clojure" "-M:test")}
   start  {:doc "仮想 MIDI キーボードを起動"
-          :task (shell "clojure" "-M:run")}}}
+          :task (shell {:extra-env x11-env} "clojure" "-M:run")}}}
